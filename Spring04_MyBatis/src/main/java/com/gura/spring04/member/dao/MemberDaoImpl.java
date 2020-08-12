@@ -11,13 +11,14 @@ import com.gura.spring04.member.dto.MemberDto;
 // dao 를 bean 으로 만들기 위한 어노테이션(spring 이 관리하는 객체를 만들기 위한 어노테이션) 
 @Repository
 public class MemberDaoImpl implements MemberDao{
-	//의존 객체 주입 받기(Dependency Injection)
+	//의존 객체 주입 받기(Dependency Injection) 호출되기 직전에 주입 의존성을 줄이기 위해 인터페이스활용하며 이렇게 사용
 	@Autowired
-	private SqlSession session;
+	private SqlSession session; //servlet-context.xml에 있음
 	
 	@Override
 	public void insert(MemberDto dto) {
 		/*
+		 * SqlSession을 활용하는 것임 sql문은 xxxMapper에 다 들어가있음
 		 *  mapper namespace : member
 		 *  sql id : insert
 		 *  parameterType : MemberDto

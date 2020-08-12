@@ -16,7 +16,7 @@ import com.gura.spring04.member.dto.MemberDto;
 @Service
 public class MemberServiceImpl implements MemberService{
 	
-	//의존 객체 주입 받기 
+	//의존 객체 주입 받기 bean에서 관리하고 있는 것을 주입 받음
 	@Autowired
 	private MemberDao dao;
 	//회원정보를 추가 하는 비즈니스 로직 처리 

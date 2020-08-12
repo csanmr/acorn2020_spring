@@ -12,7 +12,7 @@ import com.gura.spring04.member.service.MemberService;
 
 @Controller
 public class MemberController {
-	//의존객체를 주입 받는다.
+	//의존객체를 주입 받는다. bean에서 관리하고 있는 것이 있으면 주입
 	@Autowired
 	private MemberService service;
 	
