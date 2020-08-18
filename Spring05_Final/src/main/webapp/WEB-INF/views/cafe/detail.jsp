@@ -13,6 +13,77 @@
 		width: 100%;
 		border: 1px dotted #cecece;
 	}
+	/* 댓글 프로필 이미지를 작은 원형으로 만든다. */
+	#profileImage{
+		width: 50px;
+		height: 50px;
+		border: 1px solid #cecece;
+		border-radius: 50%;
+	}
+	/* ul 요소의 기본 스타일 제거 */
+	.comments ul{
+		padding: 0;
+		margin: 0;
+		list-style-type: none;
+	}
+	.comments dt{
+		margin-top: 5px;
+	}
+	.comments dd{
+		margin-left: 50px;
+	}
+	.comment_form textarea, .comment_form button, 
+		.comment-insert-form textarea, .comment-insert-form button{
+		float: left;
+	}
+	.comments li{
+		clear: left;
+	}
+	.comments ul li{
+		border-top: 1px solid #888;
+	}
+	.comment_form textarea, .comment-insert-form textarea{
+		width: 85%;
+		height: 100px;
+	}
+	.comment_form button, .comment-insert-form button{
+		width: 15%;
+		height: 100px;
+	}
+	/* 댓글에 댓글을 다는 폼은 일단 숨긴다. */
+	.comments form{
+		display: none;
+	}
+	/* .reply_icon 을 li 요소를 기준으로 배치하기 */
+	.comments li{
+		position: relative;
+	}
+	
+	.comments .reply_icon{
+		position: absolute;
+		top: 1em;
+		left:1em;
+		color: red;
+	}
+	
+	
+	pre {
+	  display: block;
+	  padding: 9.5px;
+	  margin: 0 0 10px;
+	  font-size: 13px;
+	  line-height: 1.42857143;
+	  color: #333333;
+	  word-break: break-all;
+	  word-wrap: break-word;
+	  background-color: #f5f5f5;
+	  border: 1px solid #ccc;
+	  border-radius: 4px;
+	}
+	/* 글 내용 중에 이미지가 있으면 최대 폭을 100%로 제한하기 */
+	.contents img{
+		max-width: 100%;
+	}
 </style>
 </head>
 <body>
@@ -77,8 +148,115 @@
 			삭제
 		</a>			
 	</c:if>
+	
+	<!-- 댓글 목록 ( <pre>는 개행기호 같은 것을 해석해줌 ) -->
+	<div class="comments">
+		<ul>
+			<c:forEach var="tmp" items="${commentList }">
+				<c:choose>
+					<c:when test="${tmp.deleted eq 'yes' }">
+						<li>삭제된 댓글입니다.</li>
+					</c:when>
+					<c:otherwise>
+						<li <c:if test="${tmp.num ne tmp.comment_group }">style="padding-left:50px;</c:if>">
+							<c:if test="${tmp.num ne tmp.comment_group }"><svg class="reply_icon" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-return-right" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+								  <path fill-rule="evenodd" d="M10.146 5.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L12.793 9l-2.647-2.646a.5.5 0 0 1 0-.708z"/>
+								  <path fill-rule="evenodd" d="M3 2.5a.5.5 0 0 0-.5.5v4A2.5 2.5 0 0 0 5 9.5h8.5a.5.5 0 0 0 0-1H5A1.5 1.5 0 0 1 3.5 7V3a.5.5 0 0 0-.5-.5z"/>
+								</svg>				
+							</c:if>
+							<dl>
+								<dt>
+									<c:choose>
+										<c:when test="${empty tmp.profile }">
+											<svg id="profileImage" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-person-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+					  						<path fill-rule="evenodd" d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+											</svg>
+										</c:when>
+										<c:otherwise>
+											<img id="profileImage" src="${pageContext.request.contextPath}${dto.profile}"/>
+										</c:otherwise>
+									</c:choose>
+									<span>${tmp.writer }</span>
+									<c:if test="${tmp.num ne tmp.comment_group }">
+										@<strong>${tmp.target_id }</strong>
+									</c:if>
+									<span>${tmp.regdate }</span>
+									<a href="javascript:" class="reply_link">답글</a>
+									<c:if test="${tmp.writer eq id }">
+										<a href="javascript:deleteComment(${tmp.num })">| 삭제</a>
+									</c:if>
+								</dt>
+								<dd>
+									<pre>${tmp.content }</pre>
+								</dd>
+							</dl>
+							<form class="comment-insert-form" action="private/comment_insert.do" method="post">
+								<input type="hidden" name="ref_group" value="${dto.num }" />
+								<input type="hidden" name="target_id" value="${tmp.writer }" />
+								<input type="hidden" name="comment_group" value="${tmp.comment_group }" />
+								<textarea name="content"></textarea>
+								<button type="submit">등록</button>
+							</form>
+						</li>						
+					</c:otherwise>
+				</c:choose>
+			</c:forEach>
+		</ul>
+	</div>
+	
+	<div class="comment_form">
+	<!-- 원글에 댓글을 작성하는 form -->
+		<form action="private/comment_insert.do" method="post">
+			<!-- 원글의 글번호가 ref_group번호가 된다 -->
+			<input type="hidden" name="ref_group" value="${dto.num }" />
+			<!-- 원글의 작성자가 댓글의 수신자가 된다. -->
+			<input type="hidden" name="target_id" value="${dto.writer }" />
+			<textarea name="content"><c:if test="${empty id }">로그인이 필요합니다</c:if></textarea> 
+			<button type="submit">등록</button>
+		</form>
+	</div>
 </div>
+<script src="${pageContext.request.contextPath}/resources/js/jquery-3.5.1.js"></script>
 <script>
+	
+	function deleteComment(num){
+		var isDelete=confirm("댓글을 삭제 하시겠습니까?");
+		if(isDelete){
+			location.href="${pageContext.request.contextPath}/cafe/private/comment_delete.do?num="+num+"&ref_group=${dto.num}";
+		}else{
+			
+		}
+	}
+
+	//답글 달기 링크를 클릭했을 때 실행할 함수 등록
+	$(".reply_link").on("click", function(){
+		//로그인 여부
+		var isLogin=${not empty id};
+		if(isLogin==false){
+			alert("로그인 페이지로 이동합니다")
+			location.href="${pageContext.request.contextPath}/users/loginform.do?"+
+					"url=${pageContext.request.contextPath}/cafe/detail.do?num=${dto.num}";
+		}
+		
+		$(this).parent().parent().parent().find(".comment-insert-form").slideToggle();
+		if($(this).text()=="답글"){ //링크 text를 답글일 때 클릭하면
+			$(this).text("취소"); //취소로 바꾸고
+		}else{ //취소일 때 클릭하면
+			$(this).text("답글"); //답글로 바꾼다
+		}
+	});
+
+	$(".comment_form").on("submit", function(){
+		//로그인 여부
+		var isLogin=${not empty id};
+		if(isLogin==false){
+			alert("로그인 페이지로 이동합니다")
+			location.href="${pageContext.request.contextPath}/users/loginform.do?"+
+					"url=${pageContext.request.contextPath}/cafe/detail.do?num=${dto.num}";
+			return false; //폼 전송 막기
+		}
+	});
+
 	function deleteConfirm(){
 		var isDelete=confirm("이 글을 삭제 하시겠습니까?");
 		if(isDelete){
