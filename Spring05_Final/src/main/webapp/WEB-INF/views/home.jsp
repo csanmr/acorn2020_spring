@@ -25,6 +25,7 @@
 	<ul>
 		<li><a href="file/list.do">자료실 목록 보기</a></li>
 		<li><a href="cafe/list.do">카페글 목록 보기</a></li>
+		<li><a href="ajax_comment_list.do">ajax 댓글 목록 보기</a></li>
 	</ul>
 </div>
 </body>

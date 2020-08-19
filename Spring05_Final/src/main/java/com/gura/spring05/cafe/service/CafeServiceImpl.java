@@ -13,7 +13,6 @@ import com.gura.spring05.cafe.dao.CafeDao;
 import com.gura.spring05.cafe.dto.CafeCommentDto;
 import com.gura.spring05.cafe.dto.CafeDto;
 import com.gura.spring05.exception.NotDeleteException;
-import com.gura.spring05.file.dto.FileDto;
 
 @Service
 public class CafeServiceImpl implements CafeService{
@@ -73,6 +72,7 @@ public class CafeServiceImpl implements CafeService{
 		List<CafeDto> list=cafeDao.getList(dto);
 		//전체 row 의 갯수 
 		int totalRow=cafeDao.getCount(dto);
+		
 		//전체 페이지의 갯수 구하기
 		int totalPageCount=
 				(int)Math.ceil(totalRow/(double)PAGE_ROW_COUNT);
@@ -140,21 +140,45 @@ public class CafeServiceImpl implements CafeService{
 		//글 조회수 올리기
 		cafeDao.addViewCount(num);
 		
-		//원글의 글번호를 이용해서 댓글 목록을 얻어온다.
-		List<CafeCommentDto> commentList=cafeCommentDao.getList(num);
-		//request에 담아준다.
+		/* 아래는 댓글 페이징 처리 관련 비즈니스 로직 입니다.*/
+		final int PAGE_ROW_COUNT=5;
+		
+		//보여줄 페이지의 번호
+		int pageNum=1;
+		
+		//보여줄 페이지 데이터의 시작 ResultSet row 번호
+		int startRowNum=1+(pageNum-1)*PAGE_ROW_COUNT;
+		//보여줄 페이지 데이터의 끝 ResultSet row 번호
+		int endRowNum=pageNum*PAGE_ROW_COUNT;
+		
+		//전체 row 의 갯수를 읽어온다.
+		//자세히 보여줄 글의 번호가 ref_group  번호 이다. 
+		int totalRow=cafeCommentDao.getCount(num);
+		//전체 페이지의 갯수 구하기
+		int totalPageCount=
+				(int)Math.ceil(totalRow/(double)PAGE_ROW_COUNT);
+		
+		// CafeCommentDto 객체에 위에서 계산된 startRowNum 과 endRowNum 을 담는다.
+		CafeCommentDto commentDto=new CafeCommentDto();
+		commentDto.setStartRowNum(startRowNum);
+		commentDto.setEndRowNum(endRowNum);
+		//ref_group 번호도 담는다.
+		commentDto.setRef_group(num);
+		
+		//DB 에서 댓글 목록을 얻어온다.
+		List<CafeCommentDto> commentList=cafeCommentDao.getList(commentDto);
+		//request 에 담아준다.
 		request.setAttribute("commentList", commentList);
+		request.setAttribute("totalPageCount", totalPageCount);
 	}
 
 	@Override
 	public void saveContent(CafeDto dto) {
-		// TODO Auto-generated method stub
 		cafeDao.insert(dto);
 	}
 
 	@Override
 	public void updateContent(CafeDto dto) {
-		// TODO Auto-generated method stub
 		cafeDao.update(dto);
 	}
 
@@ -167,7 +191,7 @@ public class CafeServiceImpl implements CafeService{
 		//만일 로그인된 아이디와 글 작성자가 다르면
 		if(!id.equals(dto.getWriter())) {
 			throw new NotDeleteException("남의 글 지우기 없기!");
-		}
+		}		// TODO Auto-generated method stub
 		cafeDao.delete(num);
 	}
 
@@ -180,51 +204,87 @@ public class CafeServiceImpl implements CafeService{
 		String target_id=request.getParameter("target_id");
 		String content=request.getParameter("content");
 		/*
-		 *  원글의 댓글은 comment_group 번호가 정송이 안되고
+		 *  원글의 댓글은 comment_group 번호가 전송이 안되고
 		 *  댓글의 댓글은 comment_group 번호가 전송이 된다.
-		 *  따라서 null 여부를 조사하면 원글의 댓글인지 댓글의 댓글인지 판단할 수 있다.
+		 *  따라서 null 여부를 조사하면 원글의 댓글인지 댓글의 댓글인지 판단할수 있다. 
 		 */
-		
 		String comment_group=request.getParameter("comment_group");
-		//새 댓글의 번호는 dao를 이용해서 미리 얻어낸다.
+		//새 댓글의 글번호는 dao 를 이용해서 미리 얻어낸다. 
 		int seq=cafeCommentDao.getSequence();
 		
-		//저장할 댓글 정보를 dto에 담기
+		//저장할 댓글 정보를 dto 에 담기
 		CafeCommentDto dto=new CafeCommentDto();
 		dto.setNum(seq);
 		dto.setWriter(writer);
 		dto.setTarget_id(target_id);
 		dto.setContent(content);
 		dto.setRef_group(ref_group);
-		if(comment_group==null) { //원글의 댓글인 경우
-			//댓글의 번호가 comment_group 번호가 된다.
+		if(comment_group==null) {//원글의 댓글인 경우 
+			//댓글의 글번호가 comment_group 번호가 된다. 
 			dto.setComment_group(seq);
-		}else { //댓글의 댓글인 경우
-			//폼 전송된 comment_group번호를 숫자로 바꿔서 dto에 넣어준다.
+		}else {//댓글의 댓글인 경우 
+			//폼 전송된 comment_group 번호를 숫자로 바꿔서 dto 에 넣어준다.
 			dto.setComment_group(Integer.parseInt(comment_group));
 		}
-		//댓글 정보를 DB에 저장한다.
+		//댓글 정보를 DB 에 저장한다.
 		cafeCommentDao.insert(dto);
 	}
 
 	@Override
 	public void deleteComment(HttpServletRequest request) {
-		// GET방식 파라미터로 전달되는 삭제할 댓글 번호
+		//GET 방식 파라미터로 전달되는 삭제할 댓글 번호 
 		int num=Integer.parseInt(request.getParameter("num"));
 		//세션에 저장된 로그인된 아이디
 		String id=(String)request.getSession().getAttribute("id");
-		//댓글의 정보를 얻어와서 댓글의 작성자와 같은지 비교한다.
+		//댓글의 정보를 얻어와서 댓글의 작성자와 같은지 비교 한다.
 		String writer=cafeCommentDao.getData(num).getWriter();
 		if(!writer.equals(id)) {
-			throw new NotDeleteException("남의 댓글을 삭제할 수 없습니다.");
+			throw new NotDeleteException("남의 댓글을 삭제할수 없습니다.");
 		}
 		cafeCommentDao.delete(num);
 	}
 
 	@Override
 	public void updateComment(CafeCommentDto dto) {
-		// TODO Auto-generated method stub
 		cafeCommentDao.update(dto);
+	}
+
+	@Override
+	public void moreCommentList(HttpServletRequest request) {
+		//파라미터로 전달된 pageNum 과 ref_group 번호를 읽어온다. 
+		int pageNum=Integer.parseInt(request.getParameter("pageNum"));
+		int ref_group=Integer.parseInt(request.getParameter("ref_group"));
+		
+		CafeDto dto=cafeDao.getData(ref_group);
+		request.setAttribute("dto", dto);
+		
+		/* 아래는 댓글 페이징 처리 관련 비즈니스 로직 입니다.*/
+		final int PAGE_ROW_COUNT=5;
+		
+		//보여줄 페이지 데이터의 시작 ResultSet row 번호
+		int startRowNum=1+(pageNum-1)*PAGE_ROW_COUNT;
+		//보여줄 페이지 데이터의 끝 ResultSet row 번호
+		int endRowNum=pageNum*PAGE_ROW_COUNT;
+		
+		//전체 row 의 갯수를 읽어온다.
+		//자세히 보여줄 글의 번호가 ref_group  번호 이다. 
+		int totalRow=cafeCommentDao.getCount(ref_group);
+		//전체 페이지의 갯수 구하기
+		int totalPageCount=
+				(int)Math.ceil(totalRow/(double)PAGE_ROW_COUNT);
+		
+		// CafeCommentDto 객체에 위에서 계산된 startRowNum 과 endRowNum 을 담는다.
+		CafeCommentDto commentDto=new CafeCommentDto();
+		commentDto.setStartRowNum(startRowNum);
+		commentDto.setEndRowNum(endRowNum);
+		//ref_group 번호도 담는다.
+		commentDto.setRef_group(ref_group);
+		
+		//DB 에서 댓글 목록을 얻어온다.
+		List<CafeCommentDto> commentList=cafeCommentDao.getList(commentDto);
+		//request 에 담아준다.
+		request.setAttribute("commentList", commentList);
+		request.setAttribute("totalPageCount", totalPageCount);		
 	}
 	
 }

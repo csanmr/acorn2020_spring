@@ -22,16 +22,18 @@ import com.gura.spring05.cafe.service.CafeService;
 public class CafeController {
 	@Autowired
 	private CafeService cafeService;
-	
+	//카페 글 목록 보기 요청 처리 
 	@RequestMapping("/cafe/list")
-	public ModelAndView getList(HttpServletRequest request, ModelAndView mView) {
+	public ModelAndView getList(HttpServletRequest request, 
+			ModelAndView mView) {
 		cafeService.getList(request);
 		mView.setViewName("cafe/list");
 		return mView;
 	}
 	
 	@RequestMapping("/cafe/detail")
-	public ModelAndView detail(HttpServletRequest request, ModelAndView mView) {
+	public ModelAndView detail(HttpServletRequest request,
+			ModelAndView mView) {
 		cafeService.getDetail(request);
 		mView.setViewName("cafe/detail");
 		return mView;
@@ -39,13 +41,14 @@ public class CafeController {
 	
 	@RequestMapping("/cafe/private/insertform")
 	public ModelAndView insertForm(ModelAndView mView) {
+		
 		mView.setViewName("cafe/insertform");
 		return mView;
 	}
 	
-	@RequestMapping(value = "/cafe/private/insert", method = RequestMethod.POST)
+	@RequestMapping(value = "/cafe/private/insert", method=RequestMethod.POST)
 	public ModelAndView insert(CafeDto dto, ModelAndView mView, HttpSession session) {
-		//dto에 글 작성자를 담기
+		//dto 에 글 작성자 담기 
 		String id=(String)session.getAttribute("id");
 		dto.setWriter(id);
 		cafeService.saveContent(dto);
@@ -54,49 +57,61 @@ public class CafeController {
 	}
 	
 	@RequestMapping("/cafe/private/updateform")
-	public ModelAndView updateForm(ModelAndView mView, HttpServletRequest request) {
+	public ModelAndView updateform(HttpServletRequest request,
+			ModelAndView mView) {
 		cafeService.getDetail(request);
 		mView.setViewName("cafe/updateform");
 		return mView;
 	}
-	
-	@RequestMapping(value = "/cafe/private/update", method = RequestMethod.POST)
-	public ModelAndView update(CafeDto dto,ModelAndView mView) {
+	@RequestMapping(value="/cafe/private/update", method=RequestMethod.POST)
+	public ModelAndView update(CafeDto dto, ModelAndView mView) {
 		cafeService.updateContent(dto);
 		mView.setViewName("cafe/update");
 		return mView;
 	}
-	
-	@RequestMapping("/cafe/delete")
-	public ModelAndView delete(int num, HttpServletRequest request, ModelAndView mView) {
+	@RequestMapping("/cafe/private/delete")
+	public ModelAndView delete(int num, HttpServletRequest request,
+			ModelAndView mView) {
 		cafeService.deleteContent(num, request);
 		mView.setViewName("redirect:/cafe/list.do");
 		return mView;
 	}
-	@RequestMapping(value = "/cafe/private/comment_insert", method = RequestMethod.POST)
-	public ModelAndView commentInsert(HttpServletRequest request, ModelAndView mView, @RequestParam int ref_group) {
-		//새 댓글을 저장하고
+	@RequestMapping(value = "/cafe/private/comment_insert", 
+			method=RequestMethod.POST)
+	public ModelAndView commentInsert(HttpServletRequest request,
+			ModelAndView mView, @RequestParam int ref_group) {
+		//새 댓글을 저장하고 
 		cafeService.saveComment(request);
-		//보고있던 글 자세히 보기로 다시 리다이렉트 이동 시킨다.
+		//보고 있던 글 자세히 보기로 다시 리다일렉트 이동 시킨다.
 		mView.setViewName("redirect:/cafe/detail.do?num="+ref_group);
 		return mView;
 	}
 	@RequestMapping("/cafe/private/comment_delete")
-	public ModelAndView commentDelete(HttpServletRequest request, ModelAndView mView, @RequestParam int ref_group) {
+	public ModelAndView commentDelete(HttpServletRequest request,
+			ModelAndView mView, @RequestParam int ref_group) {
 		cafeService.deleteComment(request);
 		mView.setViewName("redirect:/cafe/detail.do?num="+ref_group);
 		return mView;
 	}
-	//댓글 수정 ajax 요청에 대한 요청 처리
-	@RequestMapping(value = "/cafe/private/comment_update", method = RequestMethod.POST)
+	
+	//댓글 수정 ajax 요청에 대한 요청 처리 
+	@RequestMapping(value = "/cafe/private/comment_update", 
+			method=RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> commentUpdate(CafeCommentDto dto){
-		//댓글을 수정 반영하고
+		//댓글을 수정 반영하고 
 		cafeService.updateComment(dto);
-		//JSON문자열을 클라이언트에게 응답한다.
+		//JSON 문자열을 클라이언트에게 응답한다.
 		Map<String, Object> map=new HashMap<>();
 		map.put("num", dto.getNum());
 		map.put("content", dto.getContent());
 		return map;
+	}
+	@RequestMapping("/cafe/ajax_comment_list")
+	public ModelAndView ajaxCommentList(HttpServletRequest request,
+			ModelAndView mView) {
+		cafeService.moreCommentList(request);
+		mView.setViewName("cafe/ajax_comment_list");
+		return mView;
 	}
 }
