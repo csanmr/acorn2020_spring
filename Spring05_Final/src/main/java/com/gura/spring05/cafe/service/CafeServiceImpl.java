@@ -220,5 +220,11 @@ public class CafeServiceImpl implements CafeService{
 		}
 		cafeCommentDao.delete(num);
 	}
+
+	@Override
+	public void updateComment(CafeCommentDto dto) {
+		// TODO Auto-generated method stub
+		cafeCommentDao.update(dto);
+	}
 	
 }
