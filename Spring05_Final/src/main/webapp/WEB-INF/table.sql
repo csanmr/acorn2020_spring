@@ -14,7 +14,7 @@ CREATE TABLE board_cafe_comment(
 	writer VARCHAR2(100), -- 댓글 작성자의 아이디
 	content VARCHAR2(500), -- 댓글 내용
 	target_id VARCHAR2(100), -- 댓글의 대상자
-	ref_group NUMBER, -- 원 글번호
+	ref_group NUMBER, -- 원글번호
 	comment_group NUMBER, -- 댓글과 대댓글의 글번호의 그룹(댓글과 대댓글은 comment_group번호가 같음)
 	deleted CHAR(3) DEFAULT 'no',
 	regdate DATE
