@@ -47,7 +47,6 @@ public class FileController {
 		fileService.getFileData(num, mView);
 		//view 페이지로 forward 이동해서 다운로드 시켜준다.
 		//mView.setViewName("file/download"); 아래의 방식으로 바뀜 FileDownView 참고
-		
 		// @Component("fileDownView")가 붙어있는 AbstractView 객체를 찾아간다.
 		mView.setViewName("fileDownView");
 		return mView;

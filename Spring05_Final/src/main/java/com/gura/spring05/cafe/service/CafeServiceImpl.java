@@ -207,14 +207,7 @@ public class CafeServiceImpl implements CafeService{
 
 	@Override
 	public void deleteContent(int num, HttpServletRequest request) {
-		//1. 삭제할 글의 정보를 읽어온다.
-		CafeDto dto=cafeDao.getData(num);
-		//2. 본인이 작성한 글이 아닌경우 에러 처리를한다 (예외를 발생시킨다)
-		String id=(String)request.getSession().getAttribute("id");
-		//만일 로그인된 아이디와 글 작성자가 다르면
-		if(!id.equals(dto.getWriter())) {
-			throw new NotDeleteException("남의 글 지우기 없기!");
-		}		// TODO Auto-generated method stub
+
 		cafeDao.delete(num);
 	}
 
@@ -309,5 +302,52 @@ public class CafeServiceImpl implements CafeService{
 		request.setAttribute("commentList", commentList);
 		request.setAttribute("totalPageCount", totalPageCount);		
 	}
-	
+
+	@Override
+	public List<CafeDto> getList2(HttpServletRequest request) {
+		//보여줄 페이지의 번호
+		int pageNum=1;
+		//보여줄 페이지의 번호가 파라미터로 전달되는지 읽어와 본다.	
+		String strPageNum=request.getParameter("pageNum");
+		if(strPageNum != null){//페이지 번호가 파라미터로 넘어온다면
+			//페이지 번호를 설정한다.
+			pageNum=Integer.parseInt(strPageNum);
+		}
+		//보여줄 페이지 데이터의 시작 ResultSet row 번호
+		int startRowNum=1+(pageNum-1)*PAGE_ROW_COUNT;
+		//보여줄 페이지 데이터의 끝 ResultSet row 번호
+		int endRowNum=pageNum*PAGE_ROW_COUNT;
+		/*
+			검색 키워드에 관련된 처리 
+		*/
+		String keyword=request.getParameter("keyword"); //검색 키워드
+		String condition=request.getParameter("condition"); //검색 조건
+		if(keyword==null){//전달된 키워드가 없다면 
+			keyword=""; //빈 문자열을 넣어준다. 
+			condition="";
+		}
+		//인코딩된 키워드를 미리 만들어 둔다. 
+		String encodedK=URLEncoder.encode(keyword);
+		
+		//검색 키워드와 startRowNum, endRowNum 을 담을 FileDto 객체 생성
+		CafeDto dto=new CafeDto();
+		dto.setStartRowNum(startRowNum);
+		dto.setEndRowNum(endRowNum);
+		
+		if(!keyword.equals("")){ //만일 키워드가 넘어온다면 
+			if(condition.equals("title_content")){
+				//검색 키워드를 FileDto 객체의 필드에 담는다. 
+				dto.setTitle(keyword);
+				dto.setContent(keyword);	
+			}else if(condition.equals("title")){
+				dto.setTitle(keyword);
+			}else if(condition.equals("writer")){
+				dto.setWriter(keyword);
+			}
+		}
+		//카페글 목록 얻어오기
+		List<CafeDto> list=cafeDao.getList(dto);
+
+		return list;
+	}
 }

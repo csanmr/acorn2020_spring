@@ -5,7 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.gura.spring05.users.dto.UsersDto;
-
+/*
+ *  Dao에 붙인 @Repository라는 어노테이션은
+ *  DB관련 작업을 하다가 SQLException이 발생하는 경우 해당 Exception대신에
+ *  DataAccessException을 발생 시킨다.
+ *  따라서 DB관련 작업을 하다가 발생하는 예외는 예외 컨트롤러에서 처리를 하면 된다.
+ */
 @Repository
 public class UsersDaoImpl implements UsersDao {
 	@Autowired
@@ -13,7 +18,6 @@ public class UsersDaoImpl implements UsersDao {
 
 	@Override			//(parameter type)
 	public boolean isExist(String inputId) { // session에 inputId가 있는지 select해본다
-		// TODO Auto-generated method stub
 		//입력한 아이디가 존재하는지 id를 select 해본다. users.isExist에서 users(mapper namespace).isExist(sql id)
 		String id=session.selectOne("users.isExist",inputId);
 		//String id에서 String은 result type
