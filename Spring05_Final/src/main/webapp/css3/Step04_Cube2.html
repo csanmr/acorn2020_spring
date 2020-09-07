@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Step04_cube.html</title>
+	<style>
+	.wrapper{
+		perspective: 500px;
+		perspective-origin: 50% 50%;
+		margin-top: 200px;
+		border: 1px solid red;
+	}
+	.cube{
+		transform-style: preserve-3d;
+		transform-origin: 50% 50%;
+		position: relative;
+		width: 400px;
+		height: 400px;
+		margin: 0 auto; /* 가운데 정렬 */
+		transition: all 0.5s ease-out;
+		/* .cube > div를 앞으로 밀기 전에 뒤로 200px 밀어 넣기 */
+		transform: translateZ(-200px);
+	}
+	.cube > div{
+		position: absolute;
+		width: 400px;
+		height: 400px;
+		opacity: 0.6; /* 투명도 */
+		background-color: #2e272f;
+	}
+	.cube img{
+		width: 400px;
+		height: 400px;
+	}
+	.cube > div:nth-child(1){
+		transform: translateZ(200px);
+	}
+	.cube > div:nth-child(2){
+		transform: rotateY(90deg) translateZ(200px);
+	}
+	.cube > div:nth-child(3){
+		transform: rotateY(180deg) translateZ(200px);
+	}
+	.cube > div:nth-child(4){
+		transform: rotateY(270deg) translateZ(200px);
+	}
+	.cube > div:nth-child(5){
+		transform: rotateX(90deg) translateZ(200px);
+	}
+	.cube > div:nth-child(6){
+		transform: rotateX(-90deg) translateZ(200px);
+	}
+	.cube:hover{
+		transform: translateZ(-200px) rotateY(45deg);
+	}		
+	.control{
+		text-align:center;
+	}	
+	</style>
+</head>
+<body>
+<div class="wrapper">
+	<div class="cube">
+	<!-- 정면 오른쪽면 뒷면 왼쪽면 윗면 아랫면 순 -->
+		<div><img src="../resources/images/image1.png"></div>
+		<div><img src="../resources/images/image2.png"></div>
+		<div><img src="../resources/images/image3.png"></div>
+		<div><img src="../resources/images/image4.png"></div>
+		<div><img src="../resources/images/image5.png"></div>
+		<div><img src="../resources/images/image6.png"></div>
+	</div>
+</div>
+<a href="Step04_Hexagon.html">육각형으로 만들자</a>
+<div class="control">
+<button id="leftBtn">&larr;</button>
+
+<button id="rightBtn">&rarr;</button>
+
+<button id="upBtn">위로굴러</button>
+<button id="downBtn">아래로굴러</button>
+</div>
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Temporibus, earum, debitis. Consectetur inventore quaerat aperiam nihil minima, vitae laudantium, ut animi illum blanditiis cum earum, fugiat nisi ipsam dolore possimus.</p>			
+<script src="../resources/js/jquery-3.5.1.js"></script>
+<script>
+	//y, x축 회전값을 저장할 변수 만들고 0으로 초기화
+	var rY=0;
+	var rX=0;
+	$("#leftBtn").on("click", function(){
+		//rY값 시계방향이 +
+		rY += 90;
+		rotate();
+	});
+	$("#rightBtn").on("click", function(){
+		//rY값 반시계방향이 -
+		rY -= 90;
+		rotate();
+	});
+	$("#upBtn").on("click", function(){
+		//
+		rX += 90;
+		rotate();
+	});
+	$("#downBtn").on("click", function(){
+		//
+		rX -= 90;
+		rotate();
+	});
+	
+	function rotate(){
+		$(".cube").css("transform","translateZ(-200px) rotateY("+rY+"deg) rotateX("+rX+"deg)");
+	}
+	// n각형과 한변의 길이가 width일 때 몇도씩 돌면서 z축 방향으로 얼만큼 평행이동 하면 되는지에 대한 정보를 담고있는  object를 리턴하는 함수
+ 	function getAngleNtz(n, width) {
+	    var angle = Math.round(360 / n);
+	    var tz = Math.round((width / 2) / Math.tan((angle * Math.PI) / (2 * 180)));
+	    var obj = {
+	      angle: angle,
+	      tz: tz
+	    };
+	    return obj;
+	  }
+</script>
+</body>
+</html>

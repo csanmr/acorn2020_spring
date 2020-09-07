@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>css3/Step03_Quiz.html</title>
+<style>
+	.wrapper{
+		text-align: center;
+	}
+	.wrapper img{
+		transition: transform 0.4s ease-out;
+	}
+</style>
+</head>
+<body>
+<h1>transition 테스트</h1>
+<button id="leftBtn">좌</button>
+<button id="rightBtn">우</button>
+<button id="rotateBtn">회전</button>
+<a href="Step04_3dTransform.html">다음</a>
+<div class="wrapper">
+	<img src="../resources/images/kim1.png"/>
+</div>
+<script src="../resources/js/jquery-3.5.1.js"></script>
+<script>
+	//hint
+	var x=0;
+	var angle=0;
+	// $(".wrapper img").css("transform","translateX("+x+"px) rotate("+angle+"deg)");
+	$("#leftBtn").on("click", function(){
+		x -= 50;
+		move();
+	});
+	$("#rightBtn").on("click", function(){
+		x += 50;
+		move();
+	});
+	$("#rotateBtn").on("click", function(){
+		angle += 45;
+		move();
+	});
+	
+	function move(){
+		$(".wrapper img").css("transform","translateX("+x+"px) rotate("+angle+"deg)");
+	}
+</script>
+</body>
+</html>
