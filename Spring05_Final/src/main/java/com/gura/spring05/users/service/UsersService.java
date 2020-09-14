@@ -19,4 +19,6 @@ public interface UsersService {
 	public Map<String, Object> saveProfileImage(HttpServletRequest request, MultipartFile mFile);
 	public void updateUser(HttpSession session, UsersDto dto);
 	public void updateUserPwd(HttpSession session, UsersDto dto, ModelAndView mView);
+	public Map<String, Object> ajaxLoginProcess(UsersDto dto, HttpSession session);
+	public boolean jsonpLogin(UsersDto dto);
 }
